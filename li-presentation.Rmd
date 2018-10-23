@@ -1,0 +1,417 @@
+---
+title: "Demolition in Detroit: The Effect of the Hardest Hit Fund in the Distressed Housing Market"
+author: "Angela Li"
+date: "5/2/2018"
+output: 
+  beamer_presentation:
+    fig_caption: false
+    theme: CambridgeUS
+header-includes:
+- \usepackage{placeins}
+- \usepackage{dcolumn}
+- \usepackage{fancyhdr}
+- \usepackage{setspace}
+- \usepackage{chngcntr}
+- \usepackage{microtype}
+- \usepackage{booktabs}
+---
+
+## Question
+
+* What is the effect of rapid, targeted demolition on house sales prices in a distressed housing market?
+    * Does getting rid of nearby "blight" improve a home's property value?
+
+## Background
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+* Depopulation of Detroit
+    * 1.8 million in 1950 to 700,000 today
+    * Accelerated by foreclosure crisis
+    * Households leave, but houses left behind
+* Distressed housing market
+    * More supply than demand
+    * Large number of aging structures
+    * "Blight" is common
+    
+## Policy Intervention
+
+* Federal government allocates money to states for foreclosure prevention in 2010
+    * Hardest Hit Fund distributed by US Treasury to 18 states, including Michigan
+    * Goal: support homeowners with their mortgages
+* Michigan funding reallocated in 2013
+    * Hardest Hit Fund now can be used for demolition efforts
+    * First HHF-funded demolition in Detroit, April 2014
+
+## Demolitions Before/After HHF
+
+![](figs/dems_map.png)
+
+## Demolitions Over Time
+
+![](figs/dem-by-qtr.png)
+
+## Motivation
+
+* Take Hardest Hit Fund demolitions as a natural experiment
+* What effect did they have on house sales prices, if any?
+* Goals:
+    * Assess impact of nearby distress conditions (blighted structures vs. vacant lots)
+    * Assess impact of demolition program
+
+## Median Sales Price Before/After HHF
+
+![](figs/med_sales_map.png)
+
+## Literature Review
+
+* Effect of property distress
+    * Foreclosure: Kobie (2003), Immergluck (2006), Lin (2009), Harding (2009)
+    * Tax delinquency, additional conditions: Mikelbank (2008),  Whitaker (2013), Carroll (2016)
+* Hedge effect
+    * Griswold (2006), Griswold (2014), **Dynamo Metrics (2015)**
+
+## Data
+
+* Detroit Space-Time Analytics Data System (D-STADS$^{TM}$)
+    * Compiled by Dynamo Metrics
+    * ~400,000 city parcels with quarterly information
+        * Sales, property characteristics
+        * Demolition
+        * Occupancy, vacancy
+        * Tax foreclosure, delinquency
+        * Crime
+    * I use data from April 2013 - March 2015 
+
+* Detroit Open Data Portal
+    * City record of all demolitions
+    * Detroit boundary shapefiles
+
+## Summary Statistics
+
+\begin{table}[!htbp] \centering
+  \caption{Summary Statistics for Properties Sold, Q2 2013 - Q1 2015 (N = 8592)}
+  \label{descstats} 
+  
+\resizebox{0.6\textwidth}{!}{
+
+\begin{tabular}{@{\extracolsep{5pt}}lrrrr} 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+Variable & \multicolumn{1}{r}{Mean} & \multicolumn{1}{r}{Standard deviation} & \multicolumn{1}{r}{Min} & \multicolumn{1}{r}{Max} \\ 
+\hline \\[-1.8ex] 
+Sales price & \$25,699.91 & \$39,264.22 & \$1,000* & \$1,600,000.00 \\
+Log of sales price & 9.563 & 1.126 & 6.900 & 14.400 \\
+Unoccupied tax foreclosable & 5.722 & 4.560 & 0 & 34 \\
+Vacant lots & 8.423 & 10.326 & 0 & 100 \\
+Occupied & 73.959 & 23.232 & 4 & 312 \\
+Violent crime (500 ft) & 0.158 & 0.507 & 0 & 8 \\
+Property crime (500 ft) & 0.413 & 0.865 & 0 & 7 \\
+Res. sales (500 ft) >\$25,000 & 0.291 & 0.710 & 0 & 24 \\
+Tax foreclosure eligible sale& 0.124 & 0.330 & 0 & 1 \\
+Square footage & 1,138 & 1,492 & 0 & 32,767 \\
+Number of bathrooms & 1.220 & 0.473 & 0 & 9 \\
+Number of fireplaces & 0.404 & 0.519 & 0 & 3 \\
+If brick & 0.690 & 0.463 & 0 & 1 \\
+Porch area & 104 & 78 & 0 & 948 \\
+If air conditioning & 0.152 & 0.359 & 0 & 1 \\
+Age & 74.4 & 13.6 & 0 & 135 \\
+Q1 & 0.217 & 0.412 & 0 & 1 \\ 
+Q2 & 0.273 & 0.446 & 0 & 1 \\
+Q3 & 0.264 & 0.441 & 0 & 1 \\
+Q4 & 0.245 & 0.430 & 0 & 1 \\
+Arms-length sale & 0.047 & 0.212 & 0 & 1 \\
+Quit-claim sale & 0.013 & 0.114 & 0 & 1 \\
+Warranty deed sale & 0.038 & 0.191 & 0 & 1 \\
+Land contract sale & 0.037 & 0.190 & 0 & 1 \\
+REO sale & 0.159 & 0.366 & 0 & 1 \\
+Investor sale & 0.158 & 0.365 & 0 & 1 \\
+\hline \\[-1.8ex] 
+\multicolumn{4}{l}{\textit{*Note: n = 8592; sales lower than \$1000 were omitted from analysis.}} \\ 
+\end{tabular} 
+
+}
+
+\end{table} 
+
+## Hedonic Model Specification
+
+\begin{equation}
+log (salesprice_i) = \beta_0 + \beta_1 D_i^{R} + \beta_2 P_i^{HHF} + \beta_3 S_i + \beta_4 M_i + \beta_5 Q_i + \beta_6 T_i + u_i
+\end{equation}
+
+- $D_i^{R}$, property counts
+- $P_i^{HHF}$, policy variables,
+- $S_i$, physical characteristics,
+- $M_i$, housing submarket, 
+- $Q_i$, quarter sold,
+- $T_i$, sale or deed type,
+- $u_i$, error term (heteroskedastic)
+
+## Property Counts
+
+![](figs/method-counts.png)
+
+## Property Counts
+
+\begin{table}[ht]
+\begin{center}
+\caption{Average Number of Nearby Properties by Buffer Size}\label{buffersummary}
+\begin{tabular}{lccc}
+\\[-1.8ex]\hline 
+\hline \\
+\\[-4ex] & \multicolumn{3}{c}{Buffer Size} \\ 
+\cline{2-4}
+\\[-1.8ex]Property Type & \multicolumn{1}{c}{500 ft} & \multicolumn{1}{c}{1000 ft} & \multicolumn{1}{c}{1500 ft} \\
+\hline
+Unoccupied and Tax Foreclosable & 5.72 & 21.31 & 45.86 \\ 
+  Vacant Lots & 8.42 & 33.44 & 74.68 \\ 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+\multicolumn{4}{l}{\textit{*Note: counts are for residentially-zoned properties.}} \\ 
+\end{tabular}
+\end{center}
+\end{table}
+
+## Spatial Hedonic Model Specification
+
+* I first do OLS regressions:
+    * Policy variables only
+    * Policy variables with full controls
+
+* I run spatial diagnostics on my regression results and find that spatial autocorrelation is likely present.
+
+* I perform a spatial specification search and proceed with the following spatial regression models:
+
+    * Spatial lag
+    * Space-time lag, past quarter
+    * Space-time lag, all previous periods
+    
+## Spatial Lag Models
+
+* Spatial lag model
+
+\begin{equation}
+\label{hedonic-model}
+ln P_{i, t} = \beta_0 + \beta X + \lambda \mathbf{W_tP_{i, t}} + u_i
+\end{equation}
+
+* Space-time lag model
+
+\begin{equation}
+\label{hedonic-model}
+ln P_{i, t} = \beta_0 + \beta X + \lambda \mathbf{W_{t-1}P_{i, t-1}} + u_i
+\end{equation}
+
+where $X$ represents a matrix of the original hedonic variables.
+
+## Results
+
+\begin{table}
+\begin{center}
+\caption{Space-Time Lag Model, Past Quarter, All Controls}
+\label{Results}
+
+\resizebox{0.45\textwidth}{!}{
+
+\begin{tabular}{l D{.}{.}{3.5} D{.}{.}{3.5} D{.}{.}{4.5} }
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+ & \multicolumn{3}{c}{\textit{Dependent variable:}} \\
+\cline{2-4}
+\\[-1.8ex] & \multicolumn{3}{c}{Log of sales price} \\
+\\[-1.8ex] & \multicolumn{1}{c}{(1)} & \multicolumn{1}{c}{(2)} & \multicolumn{1}{c}{(3)}\\
+Buffer Size & \multicolumn{1}{c}{500 ft} & \multicolumn{1}{c}{1000 ft} & \multicolumn{1}{c}{1500 ft} \\
+\midrule
+\textbf{Spatial Lag ($W_{t-1}$$P_{t-1}$)}    & 0.263^{***} & 0.239^{***} & 0.225^{***} \\
+               & (0.021)      & (0.022)      & (0.022)      \\ 
+\textbf{Spatial Variables} & & \\
+Unoccupied Tax Foreclosable    & -0.029^{***} & -0.010^{***} & -0.005^{***} \\
+               & (0.003)      & (0.001)      & (0.000)      \\
+  & & & \\ 
+Vacant Lots    & -0.008^{***} & -0.002^{***} & -0.001^{***} \\
+               & (0.002)      & (0.000)      & (0.000)      \\
+& & & \\               
+\textbf{Policy Variables} & & \\
+In HHF Zone            & 0.100^{***}  & 0.099^{***}  & 0.097^{***}  \\
+               & (0.022)      & (0.022)      & (0.022)      \\
+  & & & \\ 
+After HHF Implementation      & 0.050     & 0.068^{*} & 0.082^{*}        \\
+               & (0.037)            & (0.040)      &  (0.042)           \\
+  & & & \\ 
+Unoccupied Tax Foreclosable $*$ After HHF  & -0.014^{***}  & -0.005^{***}  & -0.003^{***}  \\
+               & (0.005)      & (0.002)      & (0.001)      \\               
+  & & & \\ 
+Vacant Lots $*$ After HHF            & -0.002  & -0.001  & -0.0002  \\
+               & (0.002)      & (0.001)      & (0.000)      \\     
+  & & & \\ 
+\midrule
+Observations          & \multicolumn{1}{c}{8592} & \multicolumn{1}{c}{8592} & \multicolumn{1}{c}{8592} \\
+R$^2$          & 0.358        & 0.359        & 0.359        \\
+Adjusted R$^2$     & 0.356        & 0.356        & 0.357        \\
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+\textit{Note:}  & \multicolumn{3}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
+\end{tabular}
+
+}
+
+\end{center}
+\end{table}
+
+## Results Summary
+
+* For the baseline model, we find:
+    * Blight decreases home values more than vacant lots 
+    * Blight has a larger negative impact after HHF implementation
+    * Sales prices are higher within HHF zones
+* This holds up across models
+
+## Policy Evaluation
+
+* Treatment effect analysis
+    * Before/after implementation
+    * In/out of HHF zone
+* Use spatial regimes specification
+    * Identification strategy similar to difference-in-differences
+    * Addresses *spatial* heterogeneity
+
+## Spatial Heterogeneity
+![](figs/hhf_map.png)
+
+## Spatial Heterogeneity
+
+![](figs/sales-time-series.png)
+
+## Results
+
+\begin{table}
+\begin{center}
+\caption{Spatial Regimes Model by In/Out of HHF Zone, 500 ft Buffer}
+\label{Results}
+
+\resizebox{0.45\textwidth}{!}{
+
+\begin{tabular}{l D{.}{.}{3.5} D{.}{.}{3.5} D{.}{.}{4.5} }
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+ & \multicolumn{3}{c}{\textit{Dependent variable:}} \\
+\cline{2-4}
+\\[-1.8ex] & \multicolumn{2}{c}{Log of sales price} \\
+\\[-1.8ex] & \multicolumn{1}{c}{(1)} & \multicolumn{1}{c}{(2)}\\
+ & \multicolumn{1}{c}{In HHF Zone} & \multicolumn{1}{c}{Out of HHF Zone}\\
+\midrule
+\textbf{Spatial Variables} & & \\
+Unoccupied Tax Foreclosable    & -0.032^{***} & -0.042^{***} \\
+               & (0.003)      & (0.006)      \\
+  & & \\ 
+Vacant Lots    & -0.005^{**} & -0.014^{***} \\
+               & (0.002)      & (0.002)      \\
+& & \\               
+\textbf{Policy Variables} & \\
+In HHF Zone            & \multicolumn{1}{c}{---} & \multicolumn{1}{c}{---}\\
+               & & \\
+After HHF Implementation      & 0.142^{***}     & -0.043 \\
+               & (0.043)            & (0.073)      \\
+  & & \\ 
+Unoccupied Tax Foreclosable $*$ After HHF  & -0.015^{**}  & -0.010  \\
+               & (0.006)      & (0.009)     \\               
+  & & \\ 
+Vacant Lots $*$ After HHF            & -0.005^{*}  & 0.002  \\
+               & (0.003)      & (0.004)      \\     
+  & & \\ 
+\midrule
+Observations          & \multicolumn{1}{c}{5626} & \multicolumn{1}{c}{2966}\\
+R$^2$          & 0.306        & 0.392        \\
+Adjusted R$^2$     & 0.302        & 0.386     \\
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+\textit{Note:}  & \multicolumn{3}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
+\end{tabular}
+
+}
+
+\end{center}
+\end{table}
+
+## Results Summary
+
+* For this spatial regimes model, we find:
+    * Blight is worse than vacant lots in both zones
+    * Blight only has an additional negative effect within HHF zones
+    * HHF implementation is indeed a treatment
+
+## Results
+
+\begin{table}
+\begin{center}
+\caption{Spatial Regimes Model by Submarket, 500 ft Buffer}
+\label{Results}
+
+\resizebox{0.5\textwidth}{!}{
+
+\begin{tabular}{l D{.}{.}{3.5} D{.}{.}{3.5} D{.}{.}{4.5} D{.}{.}{3.5} }
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+ & \multicolumn{4}{c}{\textit{Dependent variable:}} \\
+\cline{2-5}
+\\[-1.8ex] & \multicolumn{4}{c}{Log of sales price} \\
+\\[-1.8ex] & \multicolumn{1}{c}{(1)} & \multicolumn{1}{c}{(2)} & \multicolumn{1}{c}{(3)} & \multicolumn{1}{c}{(4)}\\
+Submarket & \multicolumn{1}{c}{Low} & \multicolumn{1}{c}{Medium Low} & \multicolumn{1}{c}{Medium High} & \multicolumn{1}{c}{High} \\
+\midrule
+\textbf{Spatial Variables} & & & \\
+Unoccupied Tax Foreclosable    & -0.038^{***} & -0.031^{***} & -0.049^{***} & -0.092^{***}\\
+& (0.006)      & (0.004)      & (0.007)      & (0.020)\\
+  & & & \\ 
+Vacant Lots    & -0.009^{***} & -0.008^{***} & -0.005 & -0.014^{*}\\
+& (0.003)      & (0.002)      & (0.005)      & (0.008)\\
+& & & &\\
+\textbf{Policy Variables} & & &\\
+In HHF Zone            & 0.167^{***}  & 0.174^{***}  & 0.095^{**}  & -0.284^{*}\\
+& (0.044)      & (0.031)      & (0.045)      & (0.168)\\
+  & & & \\ 
+After HHF Implementation      & -0.061     & 0.104^{*} & 0.071  & 0.306^{**}\\
+& (0.089)            & (0.060)      &  (0.068)           & (0.128)\\
+  & & & \\ 
+Unocc. Tax Forecl. $*$ After HHF   & 0.004  & -0.021^{***}  & -0.010  & -0.018\\
+ & (0.009)      & (0.008)      & (0.013)      & (0.034)\\
+  & & & \\ 
+Vacant Lots $*$ After HHF            & 0.0002  & -0.004  & -0.008  & 0.010\\
+& (0.004)      & (0.004)      & (0.008)      & (0.011)\\
+  & & \\ 
+\midrule
+Observations          & \multicolumn{1}{c}{2327} & \multicolumn{1}{c}{3775} & \multicolumn{1}{c}{2093} & \multicolumn{1}{c}{397}\\
+R$^2$          & 0.288        & 0.270        & 0.338        & 0.536\\
+Adjusted R$^2$     & 0.279        & 0.265        & 0.329        & 0.502\\
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+\textit{Note:}  & \multicolumn{4}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
+\end{tabular}
+
+}
+
+\end{center}
+\end{table}
+
+## Results Summary
+
+* For this spatial regimes model, we find:
+    * Blight has worse effects in higher-price submarkets
+    * Effects of vacant lots differ across submarkets
+    * Interaction effect of blight and policy is only significant for the Medium Low submarket
+
+## Conclusion
+
+We find that:
+
+* Blight is worse than vacancy for house prices
+* Effect of blight varies across spatial regimes
+* Demolition appears to be effective
+
+## Further Work
+
+* Refine defintion of submarkets
+* Add accessibility measures
+* Explore cost-benefit analysis
